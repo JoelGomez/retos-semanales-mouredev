@@ -7,19 +7,39 @@ show
     date and hour
 """
 
+from datetime import datetime
 import requests
 
-try:
-    response = requests.get('https://api.github.com/repos/mouredev/retos-programacion-2023/commits')
+URL_REPO = 'https://api.github.com/repos/mouredev/retos-programacion-2023/commits'
+
+def show_repo_data(data: list):
+    """
+    show data in console
+    """
+    for i in range(10):
+        sha = data[i]['sha']
+        author = data[i]['commit']['author']['name']
+        message = data[i]['commit']['message'].replace('\n','')
+        date_commit = data[i]['commit']['author']['date']        
+        date_commit = datetime.strptime(date_commit,'%Y-%m-%dT%H:%M:%SZ')
+        date_commit = date_commit.strftime('%Y-%m-%d %H:%M:%S')
+        print(sha, author, message, date_commit, sep = '|')
+
+
+def make_request(url_repo: str):
+    """
+    making a request
+    """
+    response = requests.get(url_repo)
+
     if response.status_code == 200:
-        data = response.json()
-except:
-    print("Can't get a response from remote host")
+        json_data = response.json()
+        show_repo_data(json_data)
+    elif response.status_code  == 404:
+        print(response.status_code)
+        print("Can't get a response from remote host")
+    else:
+        print("An error has ocurred")
 
 
-#print(data[0]['sha'])
-#filtered_data = 
-
-
-for i in range(10):
-    print(data[i]['sha'], data[i]['commit']['author']['name'], data[i]['commit']['message'].replace('\n',''),data[i]['commit']['author']['date'], sep=' | ')
+make_request(URL_REPO)
